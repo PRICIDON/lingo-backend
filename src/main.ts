@@ -38,6 +38,8 @@ async function bootstrap() {
 		})
 	)
 
+	app.enableCors(getCorsConfig(config))
+
 	app.use(
 		session({
 			secret: config.getOrThrow<string>('SESSION_SECRET'),
@@ -61,8 +63,6 @@ async function bootstrap() {
 			})
 		})
 	)
-
-	app.enableCors(getCorsConfig(config))
 
 	app.useGlobalInterceptors(new ContentRangeInterceptor())
 
