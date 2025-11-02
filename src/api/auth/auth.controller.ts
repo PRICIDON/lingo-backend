@@ -40,7 +40,7 @@ export class AuthController {
 	@ApiOkResponse({
 		type: AuthResponse
 	})
-	@Recaptcha()
+	// @Recaptcha()
 	@HttpCode(HttpStatus.OK)
 	@Post('register')
 	async register(@Body() dto: RegisterRequest) {
@@ -53,7 +53,7 @@ export class AuthController {
 	@ApiOkResponse({
 		type: AuthResponse
 	})
-	@Recaptcha()
+	// @Recaptcha()
 	@Post('login')
 	@HttpCode(HttpStatus.OK)
 	async login(@Req() req: Request, @Body() dto: LoginRequest) {
