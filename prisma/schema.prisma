@@ -1,0 +1,325 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URI")
+}
+
+model User {
+  id String @id @unique @default(uuid(4))
+
+  name     String
+  email    String @unique
+  password String
+  imageSrc String @default("/mascot.svg") @map("image_src")
+
+  role Role @default(USER)
+
+  method AuthMethod
+
+  accounts Account[]
+
+  isVerified         Boolean @default(false) @map("is_verified")
+  isTwoFactorEnabled Boolean @default(false) @map("is_two_factor_enabled")
+
+  isAutoRenewal Boolean @default(true) @map("is_auto_renewal")
+
+  stripeCustomerId String? @unique @map("stripe_customer_id")
+
+  UserProgress      UserProgress?
+  ChallengeProgress ChallengeProgress[]
+
+  subscription UserSubscription?
+  transactions Transaction[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model Account {
+  id String @id @unique @default(uuid(4))
+
+  type     String
+  provider String
+
+  refreshToken String? @map("refresh_token")
+  accessToken  String? @map("access_token")
+  expiresAt    Int     @map("expires_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("accounts")
+}
+
+model Token {
+  id String @id @unique @default(uuid(4))
+
+  email     String
+  token     String    @unique
+  type      TokenType
+  expiresIn DateTime  @map("expires_in")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("tokens")
+}
+
+model UserSubscription {
+  id String @id @unique @default(uuid(4))
+
+  status SubscriptionStatus @default(PENDING_PAYMENT)
+
+  startDate DateTime? @map("start_date")
+  endDate   DateTime? @map("end_date")
+
+  stripeSubscriptionId String? @unique @map("stripe_subscription_id")
+
+  transactions Transaction[]
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique @map("user_id")
+
+  plan   Plan   @relation(fields: [planId], references: [id], onDelete: Cascade)
+  planId String @unique @map("plan_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("user_subscriptions")
+}
+
+model UserProgress {
+  id String @id @unique @default(uuid(4))
+
+  hearts Int @default(5)
+  points Int @default(0)
+
+  activeCourse   Course? @relation(fields: [activeCourseId], references: [id], onDelete: Cascade)
+  activeCourseId String? @map("active_course_id")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @unique @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("user_progress")
+}
+
+model Course {
+  id String @id @unique @default(uuid(4))
+
+  title    String
+  imageSrc String @map("image_src")
+
+  userProgress UserProgress[]
+  units        Unit[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("courses")
+}
+
+model Unit {
+  id String @id @unique @default(uuid(4))
+
+  title       String
+  description String
+  order       Int
+
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  courseId String
+
+  lessons Lesson[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("units")
+}
+
+model Lesson {
+  id String @id @unique @default(uuid(4))
+
+  title String
+  order Int
+
+  unit   Unit   @relation(fields: [unitId], references: [id], onDelete: Cascade)
+  unitId String @map("unit_id")
+
+  challenges Challenge[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("lessons")
+}
+
+model Challenge {
+  id String @id @unique @default(uuid(4))
+
+  question String
+  order    Int
+  type     ChallengeType
+
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  lessonId String @map("lesson_id")
+
+  challengeOptions  ChallengeOption[]
+  challengeProgress ChallengeProgress[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("challenges")
+}
+
+model ChallengeOption {
+  id String @id @unique @default(uuid(4))
+
+  text     String
+  correct  Boolean
+  imageSrc String  @map("image_src")
+  audioSrc String  @map("audio_src")
+
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId String    @map("challenge_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("challenge_options")
+}
+
+model ChallengeProgress {
+  id String @id @unique @default(uuid(4))
+
+  completed Boolean @default(false)
+
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId String    @map("challenge_id")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("challenge_progress")
+}
+
+model Plan {
+  id String @id @unique @default(uuid(4))
+
+  title       String
+  description String
+
+  features String[]
+
+  monthlyPrice Int @map("monthly_price")
+  yearlyPrice  Int @map("yearly_price")
+
+  stripeMonthlyPriceId String @map("stripe_monthly_price_id")
+  stripeYearlyPriceId  String @map("stripe_yearly_price_id")
+
+  subscriptions UserSubscription[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("plans")
+}
+
+model Transaction {
+  id String @id @unique @default(uuid(4))
+
+  amount   Int
+  provider PaymentProvider
+  status   TransactionStatus @default(PENDING)
+
+  externalId   String? @map("external_id")
+  providerMeta Json?   @map("provider_meta")
+
+  billingPeriod BillingPeriod @map("billing_period")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  subscription   UserSubscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  subscriptionId String           @map("subscription_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("transactions")
+}
+
+enum ChallengeType {
+  SELECT
+  ASSIST
+
+  @@map("challenge_type")
+}
+
+enum Role {
+  USER
+  ADMIN
+
+  @@map("roles")
+}
+
+enum AuthMethod {
+  CREDENTIALS
+  GOOGLE
+  YANDEX
+
+  @@map("auth_methods")
+}
+
+enum TokenType {
+  VERIFICATION
+  TWO_FACTOR
+  PASSWORD_RESET
+
+  @@map("token_types")
+}
+
+enum SubscriptionStatus {
+  PENDING_PAYMENT
+  ACTIVE
+  EXPIRED
+
+  @@map("subscription_statuses")
+}
+
+enum PaymentProvider {
+  YOOKASSA
+  STRIPE
+  CRYPTOPAY
+
+  @@map("payment_providers")
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+
+  @@map("transaction_statuses")
+}
+
+enum BillingPeriod {
+  MONTHLY
+  YEARLY
+
+  @@map("billing_periods")
+}
