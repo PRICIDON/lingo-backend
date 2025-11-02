@@ -10,6 +10,8 @@ import { AuthMethod, User } from '@prisma/client'
 import { verify } from 'argon2'
 import { Request, Response } from 'express'
 
+import { ms, StringValue } from '../../common/utils/ms.util'
+import { parseBoolean } from '../../common/utils/parse-boolean.util'
 import { PrismaService } from '../../infra/prisma/prisma.service'
 import { UsersService } from '../users/users.service'
 
@@ -30,7 +32,7 @@ export class AuthService {
 		private readonly twoFactorAuthService: TwoFactorAuthService
 	) {}
 
-	async register(req: Request, dto: RegisterRequest) {
+	async register(dto: RegisterRequest) {
 		const { name, email, password } = dto
 		const isExists = await this.userService.findByEmail(email)
 		if (isExists)
@@ -148,7 +150,29 @@ export class AuthService {
 						)
 					)
 				res.clearCookie(
-					this.configService.getOrThrow<string>('SESSION_NAME')
+					this.configService.getOrThrow<string>('SESSION_NAME'),
+					{
+						domain: this.configService.getOrThrow<string>(
+							'SESSION_DOMAIN'
+						),
+						path: '/',
+						maxAge: ms(
+							this.configService.getOrThrow<StringValue>(
+								'SESSION_MAX_AGE'
+							)
+						),
+						httpOnly: parseBoolean(
+							this.configService.getOrThrow<string>(
+								'SESSION_HTTP_ONLY'
+							)
+						),
+						secure: parseBoolean(
+							this.configService.getOrThrow<string>(
+								'SESSION_SECURE'
+							)
+						),
+						sameSite: 'none'
+					}
 				)
 				resolve()
 			})

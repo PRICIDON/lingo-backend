@@ -43,8 +43,8 @@ export class AuthController {
 	@Recaptcha()
 	@HttpCode(HttpStatus.OK)
 	@Post('register')
-	async register(@Req() req: Request, @Body() dto: RegisterRequest) {
-		return await this.authService.register(req, dto)
+	async register(@Body() dto: RegisterRequest) {
+		return await this.authService.register(dto)
 	}
 
 	@ApiOperation({
