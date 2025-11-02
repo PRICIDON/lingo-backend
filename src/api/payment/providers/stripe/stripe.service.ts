@@ -28,7 +28,7 @@ export class StripeService {
 		this.stripe = new Stripe(
 			this.configService.getOrThrow<string>('STRIPE_SECRET_KEY'),
 			{
-				apiVersion: '2025-10-29.clover'
+				apiVersion: '2025-10-30.clover'
 			}
 		)
 		this.WEBHOOK_SECRET = this.configService.getOrThrow<string>(
