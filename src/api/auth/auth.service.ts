@@ -180,6 +180,7 @@ export class AuthService {
 	}
 
 	async saveSession(req: Request, user: User) {
+		console.log(req.session)
 		return new Promise((resolve, reject) => {
 			req.session.userId = user.id
 
