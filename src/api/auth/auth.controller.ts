@@ -14,7 +14,6 @@ import {
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger'
-import { Recaptcha } from '@nestlab/google-recaptcha'
 import { Request, Response } from 'express'
 
 import { AuthProviderGuard } from '../../common/guards/provider.guard'

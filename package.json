@@ -33,7 +33,6 @@
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/schedule": "^6.0.1",
     "@nestjs/swagger": "^11.2.1",
-    "@nestlab/google-recaptcha": "^3.10.0",
     "@prisma/client": "^6.17.1",
     "@react-email/components": "^0.5.7",
     "@react-email/html": "^0.0.11",
