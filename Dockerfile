@@ -1,23 +1,18 @@
-# 1. Используем официальный образ Bun
-FROM oven/bun:latest
+# 1. Используем официальный образ NodeJs
+FROM node:22
 
 # 2. Устанавливаем рабочую директорию
 WORKDIR /app
 
-# 3. Устанавливаем необходимые зависимости для node-gyp (Python, make, g++, etc.)
-RUN apt-get update && \
-    apt-get install -y python3 make g++ && \
-    ln -s /usr/bin/python3 /usr/bin/python
-
-# 4. Копируем зависимости и устанавливаем
+# 3. Копируем зависимости и устанавливаем
 COPY . .
-RUN bun install --verbose
+RUN yarn install --frozen-lockfile
 
-# 6. Сборка проекта NestJS
-RUN bun run build
+# 4. Сборка проекта NestJS
+RUN yarn run build
 
-# 7. Открываем нужный порт
-EXPOSE 3000
+# 5. Открываем нужный порт
+EXPOSE 4000
 
-# 8. Запуск прод-сервера
-CMD ["bun", "run", "start:prod"]
+# 6. Запуск прод-сервера
+CMD ["yarn", "run", "start:prod"]
