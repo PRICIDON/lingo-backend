@@ -11,10 +11,11 @@ import {
 
 interface ConfirmationTemplateProps {
 	domain: string
-	token: string
+	token: string,
+	name: string
 }
 
-export default function ConfirmationTemplate({ domain, token }: ConfirmationTemplateProps) {
+export default function ConfirmationTemplate({ domain, token, name }: ConfirmationTemplateProps) {
 	const confirmLink = `${domain}/auth/new-verification?token=${token}`
 	
 	return (
@@ -36,7 +37,7 @@ export default function ConfirmationTemplate({ domain, token }: ConfirmationTemp
 						<div className="relative px-8 py-16 overflow-hidden">
 							<div className="relative text-center">
 								<Heading className="mb-2 text-2xl font-bold text-slate-900">
-									Здравствуйте, Присидон 👋
+									Здравствуйте, {name} 👋
 								</Heading>
 								
 								<Text className="text-slate-500 text-base">

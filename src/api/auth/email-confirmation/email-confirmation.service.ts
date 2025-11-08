@@ -5,7 +5,7 @@ import {
 	Injectable,
 	NotFoundException
 } from '@nestjs/common'
-import { TokenType } from '@prisma/client'
+import { TokenType, User } from '@prisma/client'
 import { Request } from 'express'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -71,11 +71,13 @@ export class EmailConfirmationService {
 		return this.authService.saveSession(req, existingUser)
 	}
 
-	async sendVerificationToken(email: string) {
-		const verificationToken = await this.generateVerificationToken(email)
+	async sendVerificationToken(user: User) {
+		const verificationToken = await this.generateVerificationToken(
+			user.email
+		)
 
 		await this.mailService.sendConfirmationEmail(
-			verificationToken.email,
+			user,
 			verificationToken.token
 		)
 

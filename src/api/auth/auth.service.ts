@@ -48,7 +48,7 @@ export class AuthService {
 			false
 		)
 
-		await this.emailConfirmationService.sendVerificationToken(newUser.email)
+		await this.emailConfirmationService.sendVerificationToken(newUser)
 
 		return {
 			message:
@@ -71,9 +71,7 @@ export class AuthService {
 			)
 
 		if (!user.isVerified) {
-			await this.emailConfirmationService.sendVerificationToken(
-				user.email
-			)
+			await this.emailConfirmationService.sendVerificationToken(user)
 			throw new UnauthorizedException(
 				'Ваш email не подтвержден. Пожалуйста, проверьте вашу почту и подтвердите адрес.'
 			)

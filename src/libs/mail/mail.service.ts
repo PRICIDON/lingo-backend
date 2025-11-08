@@ -68,14 +68,16 @@ export class MailService {
 		)
 	}
 
-	async sendConfirmationEmail(email: string, token: string) {
+	async sendConfirmationEmail(user: User, token: string) {
 		const domain = this.configService.getOrThrow<string>('APP_URL')
-		const html = await render(ConfirmationTemplate({ domain, token }))
+		const html = await render(
+			ConfirmationTemplate({ domain, token, name: user.name })
+		)
 
 		await this.queue.add(
 			'send email',
 			{
-				email,
+				email: user.email,
 				subject: 'Подтверждение почты',
 				html
 			},
