@@ -18,6 +18,10 @@ export class UpdateUserRequest {
 	@IsNotEmpty({ message: 'Email обязателен для заполнения.' })
 	email: string
 
+	@ApiProperty({
+		example: true,
+		description: "Enable or disable two factor"
+	})
 	@IsBoolean({ message: 'isTwoFactorEnabled должно быть булевым значением.' })
 	isTwoFactorEnabled: boolean
 }

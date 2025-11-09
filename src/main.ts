@@ -11,6 +11,7 @@ import { createClient } from 'redis'
 import { AppModule } from './app.module'
 import { ContentRangeInterceptor } from './common/interceptors/content-range.interceptor'
 import { ms, StringValue } from './common/utils/ms.util'
+import { isDev } from './common/utils/is-dev.util'
 import { parseBoolean } from './common/utils/parse-boolean.util'
 import { getCorsConfig } from './config/cors.config'
 import { getSwaggerConfig } from './config/swagger.config'
@@ -19,14 +20,28 @@ async function bootstrap() {
 	const app = await NestFactory.create<NestExpressApplication>(AppModule, {
 		rawBody: true
 	})
-
+	
 	const config = app.get(ConfigService)
+	const logger = new Logger(AppModule.name)
 	const redis = createClient({
 		url: config.getOrThrow<string>('REDIS_URI'),
-		legacyMode: true
+		legacyMode: true,
+		socket: {
+			reconnectStrategy: (retries) => {
+				const delay = Math.min(retries * 500, 5000)
+				logger.warn(`🔁 Попытка переподключения к Redis (#${retries}) через ${delay} мс`);
+        return delay;
+			}
+		}
 	} as any)
+	 redis.on('error', (err) => {
+    logger.error(`Redis error: ${err.message}`);
+  });
+
+  redis.on('connect', () => logger.log('✅ Подключено к Redis'));
+  redis.on('end', () => logger.warn('⚠️ Соединение с Redis закрыто'));
+  redis.on('reconnecting', () => logger.warn('🔁 Переподключение к Redis...'));
 	await redis.connect()
-	const logger = new Logger(AppModule.name)
 
 	app.set('trust proxy', true)
 
@@ -55,7 +70,7 @@ async function bootstrap() {
 				secure: parseBoolean(
 					config.getOrThrow<string>('SESSION_SECURE')
 				),
-				sameSite: 'none'
+				sameSite: isDev(config) ? 'lax' : 'none'
 			},
 			store: new RedisStore({
 				client: redis,

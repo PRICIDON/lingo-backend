@@ -9,8 +9,8 @@ import { ConfigService } from '@nestjs/config'
 import { AuthMethod, User } from '@prisma/client'
 import { verify } from 'argon2'
 import { Request, Response } from 'express'
+import { isDev } from 'src/common/utils/is-dev.util'
 
-import { ms, StringValue } from '../../common/utils/ms.util'
 import { parseBoolean } from '../../common/utils/parse-boolean.util'
 import { PrismaService } from '../../infra/prisma/prisma.service'
 import { UsersService } from '../users/users.service'
@@ -154,11 +154,6 @@ export class AuthService {
 							'SESSION_DOMAIN'
 						),
 						path: '/',
-						maxAge: ms(
-							this.configService.getOrThrow<StringValue>(
-								'SESSION_MAX_AGE'
-							)
-						),
 						httpOnly: parseBoolean(
 							this.configService.getOrThrow<string>(
 								'SESSION_HTTP_ONLY'
@@ -169,7 +164,7 @@ export class AuthService {
 								'SESSION_SECURE'
 							)
 						),
-						sameSite: 'none'
+						sameSite: isDev(this.configService) ? 'lax' : 'none'
 					}
 				)
 				resolve()

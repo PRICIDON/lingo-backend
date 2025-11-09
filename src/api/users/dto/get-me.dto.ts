@@ -54,4 +54,10 @@ export class GetMeResponse {
 		example: '/mascot.svg'
 	})
 	imageSrc: string
+	
+	@ApiProperty({
+		example: true,
+		description: 'Whether two factor is enabled'
+	})
+	isTwoFactorEnabled: boolean
 }
