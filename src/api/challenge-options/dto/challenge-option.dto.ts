@@ -18,13 +18,13 @@ export class CreateChallengeOptionRequest {
 		description: 'Challenge Option Image Source'
 	})
 	@IsString()
-	@IsNotEmpty()
+	@IsOptional()
 	imageSrc: string
 	@ApiProperty({
 		description: 'Challenge Option Audio Source'
 	})
 	@IsString()
-	@IsNotEmpty()
+	@IsOptional()
 	audioSrc: string
 	@ApiProperty({
 		description: 'Challenge Id'

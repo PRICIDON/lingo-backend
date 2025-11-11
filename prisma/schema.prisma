@@ -188,8 +188,8 @@ model ChallengeOption {
 
   text     String
   correct  Boolean
-  imageSrc String  @map("image_src")
-  audioSrc String  @map("audio_src")
+  imageSrc String?  @map("image_src")
+  audioSrc String?  @map("audio_src")
 
   challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   challengeId String    @map("challenge_id")
